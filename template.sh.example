@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+export ENVIRONMENT=local
+export JWT_TOKEN=local
+
+cdk synth --app "npx ts-node --prefer-ts-exts infrastructure/bin/development.ts" --no-staging > template.yaml
+exit 1
