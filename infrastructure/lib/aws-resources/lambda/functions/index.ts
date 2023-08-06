@@ -1,3 +1,3 @@
+import { shopifyFunctions } from './shopify.functions';
 
-export const lambdaFunctions = [];
-export { };
+export const lambdaFunctions = [...shopifyFunctions];

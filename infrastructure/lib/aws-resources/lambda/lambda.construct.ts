@@ -15,7 +15,7 @@ export class LambdaConstruct extends Construct {
     const defaultEnvironments = {
       ENVIRONMENT: process.env.ENVIRONMENT || 'dev',
       REST_API_ID: getParameter(scope, appConfig.ssm.restApiId),
-      JWT_TOKEN: process.env.JWT_TOKEN || '',
+      SHOPIFY_ACCESS_TOKEN: appConfig.shopify.accessToken,
     };
     // Create Lambda Function
     const result: { [key: string]: NodejsFunction } = {};

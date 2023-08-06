@@ -1,4 +1,10 @@
 const configsByEnv: any = {
+  local: {
+    profile: {
+      accountId: '632145475845',
+      region: 'ap-southeast-1',
+    },
+  },
   dev: {
     profile: {
       accountId: '632145475845',

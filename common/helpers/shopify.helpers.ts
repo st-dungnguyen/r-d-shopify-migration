@@ -18,7 +18,7 @@ export class ShopifyHelpers {
     })
   }
 
-  async graphqlWithRetry(input: { query: string; variables?: any }, retry: number = 0): Promise<any> {
+  async graphqlFetch(input: { query: string; variables?: any }, retry: number = 0): Promise<any> {
     try {
       const response = await this.client.post('/2023-07/graphql.json', input);
       const { data, extensions, errors } = response.data;
@@ -35,14 +35,14 @@ export class ShopifyHelpers {
       if (retry < 5) {
         retry += 1;
         console.info(`[GRAPHQL] Shopify GraphQL retry ${retry} times`);
-        return await this.graphqlWithRetry(input, retry);
+        return await this.graphqlFetch(input, retry);
       }
       console.error('[GRAPHQL] Shopify GraphQL Errors : ', JSON.stringify(error));
       throw new BaseError(500, 'Internal Error');
     }
   }
 
-  async graphyqlWithURL(url: string, input: any) {
+  async fetch(url: string, input: any) {
     const output = await this.client.post(url, input, {
       headers: {
         ...input.getHeaders(),

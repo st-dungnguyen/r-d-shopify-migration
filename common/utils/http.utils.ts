@@ -1,5 +1,5 @@
 import { BaseError, CommonError } from '../helpers/error.helpers';
-import { LogLevel, Logger } from '../helpers/logger.helpers';
+import { Logger } from './logger.utils';
 
 export const statusCode = {
   HTTP_OK: 200,
@@ -20,8 +20,7 @@ export const response = (body: any, code: number = statusCode.HTTP_OK) => {
 export const request =
   (handler: (event: any, context: any, callback: any) => Promise<any>): any =>
   async (event: any, context: any, callback: any) => {
-    const logger = new Logger();
-    logger.log(LogLevel.DEBUG, 'Input Params', event);
+    Logger.log(Logger.LogLevel.DEBUG, 'Input Params', event);
     try {
       if (event.body) {
         event.body = typeof event.body == 'object' ? event.body : JSON.parse(event.body);
@@ -31,11 +30,11 @@ export const request =
     } catch (error) {
       if (error instanceof BaseError) {
         if (error.internalMessage) {
-          logger.log(LogLevel.ERROR, 'Internal Server Error!', error.internalMessage);
+          Logger.log(Logger.LogLevel.ERROR, 'Internal Server Error!', error.internalMessage);
         }
         return error.toError();
       }
-      logger.log(LogLevel.ERROR, 'External Server Error!', error);
+      Logger.log(Logger.LogLevel.ERROR, 'External Server Error!', error);
       return CommonError.INTERNAL_SERVER_ERROR().toError();
     }
   };
