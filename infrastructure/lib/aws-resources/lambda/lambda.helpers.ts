@@ -1,14 +1,9 @@
 import { PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { Runtime } from 'aws-cdk-lib/aws-lambda';
-import { DynamodbPermission } from '../../../../common/types/dynamodb.types';
 import { HttpMethods } from '../../../../common/types/http.types';
 import { appConfig } from '../../../../config';
-import { USERS_TABLE_NAME } from '../../../../db/dynamodb/tables';
 
 type FunctionMemorySize = 128 | 256 | 512 | 1024;
-
-export { DynamodbPermission };
-export { USERS_TABLE_NAME };
 
 export interface LambdaFunctionProps {
   functionName: string;
@@ -21,7 +16,6 @@ export interface LambdaFunctionProps {
     [key: string]: string;
   };
   ssm?: string;
-  dynamodbTables?: { [tableName: string]: DynamodbPermission[] };
   customPolicies?: PolicyStatement[];
   auth?: boolean;
   apiResourcePath?: string;
@@ -39,7 +33,6 @@ export class LambdaFunction implements LambdaFunctionProps {
     [key: string]: string;
   };
   ssm?: string;
-  dynamodbTables?: { [tableName: string]: DynamodbPermission[] };
   customPolicies?: PolicyStatement[];
   auth?: boolean;
   apiResourcePath?: string;
@@ -54,7 +47,6 @@ export class LambdaFunction implements LambdaFunctionProps {
     this.memorySize = data.memorySize || 128;
     this.environment = data.environment;
     this.ssm = data.ssm ? `${appConfig.env}${data.ssm}` : `${this.functionName}`;
-    this.dynamodbTables = data.dynamodbTables;
     this.customPolicies = data.customPolicies;
     this.auth = data.auth;
     this.apiResourcePath = data.apiResourcePath;

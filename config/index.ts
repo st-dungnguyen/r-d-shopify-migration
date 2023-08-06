@@ -1,28 +1,10 @@
 const configsByEnv: any = {
-  local: {
-    profile: {
-      accountId: '632145475845',
-      region: 'ap-southeast-1',
-    },
-  },
   dev: {
     profile: {
       accountId: '632145475845',
       region: 'ap-southeast-1',
     },
-  },
-  stg: {
-    profile: {
-      accountId: '632145475845',
-      region: 'ap-southeast-1',
-    },
-  },
-  prd: {
-    profile: {
-      accountId: '632145475845',
-      region: 'ap-southeast-1',
-    },
-  },
+  }
 };
 
 export interface AppConfig {
@@ -34,12 +16,6 @@ export interface AppConfig {
     restApiId: string;
     rootResourceId: string;
   };
-  // dynamodb: {
-  //   apiVersion: string;
-  //   region: string;
-  //   endpoint: string;
-  // };
-  jwtSecretKey: string;
   shopify: {
     storeName: string;
     accessToken: string;
@@ -51,7 +27,6 @@ export const getConfig = (env: string | undefined = process.env.ENVIRONMENT) => 
     throw new Error('Missing environment variables. Please pass in "ENVIRONMENT={env} your_command".');
   }
 
-  const region = configsByEnv[env].profile.region;
   const appConfig: AppConfig = {
     ...configsByEnv[env],
     env,
@@ -63,12 +38,6 @@ export const getConfig = (env: string | undefined = process.env.ENVIRONMENT) => 
       restApiId: `${env}RestApiId`,
       rootResourceId: `${env}RootResourceId`,
     },
-    // dynamodb: {
-    //   apiVersion: '2012-08-10',
-    //   region,
-    //   endpoint: env === 'local' ? 'http://host.docker.internal:8000' : `http://dynamodb.${region}.amazonaws.com`,
-    // },
-    jwtSecretKey: process.env.JWT_TOKEN || '',
     shopify: {
       storeName: 'db-migration-s2',
       accessToken: process.env.SHOPIFY_ACCESS_TOKEN,

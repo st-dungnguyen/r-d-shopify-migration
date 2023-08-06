@@ -8,7 +8,6 @@ import {
   ApigatewayConstruct,
   LambdaConstruct,
   apiResources,
-  authorizeFunction,
   lambdaFunctions,
 } from '../lib/aws-resources';
 
@@ -25,10 +24,9 @@ class DevelopmentStack extends cdk.Stack {
 
     // Create Lambda Functions
     const lambdaConstruct = new LambdaConstruct(this, `${appConfig.env}LambdaConstruct`);
-    const funcs = lambdaConstruct.createLambdaFunctions(this, [authorizeFunction, ...lambdaFunctions]);
+    const funcs = lambdaConstruct.createLambdaFunctions(this, lambdaFunctions);
 
     // Create API Resources
-    apigatewayConstruct.createApiAuthorizer(this);
     apigatewayConstruct.createApiResources(this, apiResources, funcs);
   }
 }

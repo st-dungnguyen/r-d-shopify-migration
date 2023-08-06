@@ -15,7 +15,6 @@ export class ApigatewayStack extends Stack {
       this.apigatewayConstruct.ssmParams.restApiId,
       this.apigatewayConstruct.ssmParams.rootResourceId
     );
-    this.apigatewayConstruct.createApiAuthorizer(this);
     this.apigatewayConstruct.createApiResources(this, apiResources);
   }
 }

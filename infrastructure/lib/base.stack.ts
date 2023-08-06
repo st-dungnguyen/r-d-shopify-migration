@@ -9,6 +9,5 @@ export class BaseStack extends Stack {
 
     const apigatewayConstruct = new ApigatewayConstruct(this, `${appConfig.env}ApigatewayConstruct`);
     apigatewayConstruct.createApiGateway(this);
-    apigatewayConstruct.createAuthenticationLambda(this);
   }
 }

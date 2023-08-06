@@ -1,6 +1,5 @@
 import { ApigatewayConstruct, apiResources } from './apigateway';
-import { DynamodbConstruct } from './dynamodb';
-import { LambdaConstruct, authorizeFunction, lambdaFunctions } from './lambda';
+import { LambdaConstruct, lambdaFunctions } from './lambda';
 
-export { ApigatewayConstruct, DynamodbConstruct, LambdaConstruct };
-export { apiResources, lambdaFunctions, authorizeFunction };
+export { ApigatewayConstruct, LambdaConstruct };
+export { apiResources, lambdaFunctions };

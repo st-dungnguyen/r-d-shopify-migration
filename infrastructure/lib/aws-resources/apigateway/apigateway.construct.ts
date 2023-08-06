@@ -1,4 +1,3 @@
-import { Duration } from 'aws-cdk-lib';
 import {
   AccessLogFormat,
   EndpointType,
@@ -9,15 +8,12 @@ import {
   RestApi,
   TokenAuthorizer,
 } from 'aws-cdk-lib/aws-apigateway';
-import { Effect, Policy, PolicyStatement, Role, ServicePrincipal } from 'aws-cdk-lib/aws-iam';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
-import { NodejsFunction, SourceMapMode } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { LogGroup } from 'aws-cdk-lib/aws-logs';
 import { Construct } from 'constructs';
 import { appConfig } from '../../../../config';
-import { getDynamodbTables } from '../dynamodb';
-import { LambdaFunction, authorizeFunction } from '../lambda';
-import { DynamodbPermission } from '../lambda/lambda.helpers';
+import { LambdaFunction } from '../lambda';
 import { getParameter, putParameter } from '../ssm/ssm.utils';
 import { getMethodOptionsNoAuth, getMethodOptionsWithAuth } from './apigateway.utils';
 import { ApigatewayResource } from './awigateway.helpers';
@@ -61,63 +57,6 @@ export class ApigatewayConstruct extends Construct {
     }
   }
 
-  createAuthenticationLambda(scope: Construct) {
-    if (appConfig.apiAuthorizer) {
-      const dynamodbTables = getDynamodbTables(scope);
-      const func = new NodejsFunction(this, authorizeFunction.functionName, {
-        entry: authorizeFunction.entry,
-        handler: authorizeFunction.handler,
-        functionName: authorizeFunction.functionName,
-        runtime: authorizeFunction.runtime,
-        timeout: Duration.seconds(authorizeFunction.timeout || 30),
-        memorySize: authorizeFunction.memorySize,
-        environment: {
-          ENVIRONMENT: process.env.ENVIRONMENT || 'dev',
-          REST_API_ID: this.restApi.restApiId,
-          JWT_TOKEN: process.env.JWT_TOKEN || '',
-        },
-        bundling: {
-          target: 'es2020',
-          sourceMap: true,
-          sourceMapMode: SourceMapMode.INLINE,
-          minify: false,
-        },
-      });
-      if (appConfig.env !== 'local') {
-        putParameter(this, authorizeFunction.ssm!, func.functionArn);
-      }
-      if (authorizeFunction.dynamodbTables) {
-        Object.keys(dynamodbTables).map((tableName: string) => {
-          const permissions = authorizeFunction.dynamodbTables![tableName] || [];
-          permissions.map((permission: DynamodbPermission) => {
-            if (permission === DynamodbPermission.READ_WRITE) {
-              dynamodbTables[tableName]?.table?.grantReadWriteData(func);
-            }
-            if (permission === DynamodbPermission.READ) {
-              dynamodbTables[tableName]?.table?.grantReadData(func);
-            }
-            if (permission === DynamodbPermission.INDEX) {
-              if (dynamodbTables[tableName]?.policy) {
-                func.addToRolePolicy(dynamodbTables[tableName]?.policy);
-              }
-            }
-            if (permission === DynamodbPermission.WRITE) {
-              dynamodbTables[tableName]?.table?.grantWriteData(func);
-            }
-            if (permission === DynamodbPermission.FULL) {
-              dynamodbTables[tableName]?.table?.grantFullAccess(func);
-            }
-          });
-        });
-      }
-
-      // Adding custom policies
-      authorizeFunction.customPolicies?.map((policy: PolicyStatement) => {
-        func.addToRolePolicy(policy);
-      });
-    }
-  }
-
   loadParameters(scope: Construct) {
     this.ssmParams = {
       restApiId: getParameter(scope, appConfig.ssm.restApiId),
@@ -130,45 +69,6 @@ export class ApigatewayConstruct extends Construct {
       restApiId,
       rootResourceId,
     });
-  }
-
-  createApiAuthorizer(scope: Construct) {
-    if (appConfig.apiAuthorizer) {
-      // Create Lambda Function
-      const func = NodejsFunction.fromFunctionAttributes(scope, authorizeFunction.functionName, {
-        functionArn: getParameter(scope, authorizeFunction.ssm!),
-        sameEnvironment: true,
-      });
-
-      // Create IAM Policy
-      const assumePolicy = new Policy(scope, `${appConfig.env}ApiAssumeRolePolicy`);
-
-      // Add PolicyStatement to IAM Policy
-      assumePolicy.addStatements(
-        new PolicyStatement({
-          effect: Effect.ALLOW,
-          actions: ['sts:AssumeRole'],
-          resources: ['*'],
-        })
-      );
-
-      // Create IAM Role
-      const iamRole = new Role(scope, `${appConfig.env}ApiAuthorizerIamRole`, {
-        assumedBy: new ServicePrincipal('apigateway.amazonaws.com'),
-      });
-
-      // Add IAM Policy to IAM Role
-      iamRole.attachInlinePolicy(assumePolicy);
-      func.grantInvoke(iamRole);
-
-      this.authorizer = new TokenAuthorizer(scope, `${appConfig.env}JwtAuthorizer`, {
-        handler: func,
-        assumeRole: iamRole,
-        identitySource: 'method.request.header.Authorization',
-        validationRegex: '^(Bearer )[a-zA-Z0-9-_]+?.[a-zA-Z0-9-_]+?.([a-zA-Z0-9-_]+)$',
-        resultsCacheTtl: Duration.minutes(1),
-      });
-    }
   }
 
   createIntegration(handler: IFunction) {
