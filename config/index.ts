@@ -34,12 +34,16 @@ export interface AppConfig {
     restApiId: string;
     rootResourceId: string;
   };
-  dynamodb: {
-    apiVersion: string;
-    region: string;
-    endpoint: string;
-  };
+  // dynamodb: {
+  //   apiVersion: string;
+  //   region: string;
+  //   endpoint: string;
+  // };
   jwtSecretKey: string;
+  shopify: {
+    storeName: string;
+    accessToken: string;
+  };
 }
 
 export const getConfig = (env: string | undefined = process.env.ENVIRONMENT) => {
@@ -54,17 +58,21 @@ export const getConfig = (env: string | undefined = process.env.ENVIRONMENT) => 
     apiGateway: {
       name: `${env}RestApiExample`,
     },
-    apiAuthorizer: true,
+    apiAuthorizer: false,
     ssm: {
       restApiId: `${env}RestApiId`,
       rootResourceId: `${env}RootResourceId`,
     },
-    dynamodb: {
-      apiVersion: '2012-08-10',
-      region,
-      endpoint: env === 'local' ? 'http://host.docker.internal:8000' : `http://dynamodb.${region}.amazonaws.com`,
-    },
+    // dynamodb: {
+    //   apiVersion: '2012-08-10',
+    //   region,
+    //   endpoint: env === 'local' ? 'http://host.docker.internal:8000' : `http://dynamodb.${region}.amazonaws.com`,
+    // },
     jwtSecretKey: process.env.JWT_TOKEN || '',
+    shopify: {
+      storeName: 'db-migration-s2',
+      accessToken: process.env.SHOPIFY_ACCESS_TOKEN,
+    },
   };
 
   return appConfig;

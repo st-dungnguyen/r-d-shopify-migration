@@ -6,12 +6,12 @@ import { ApigatewayStack, BaseStack, DynamodbStack, LambdaStack } from '../lib';
 
 const app = new cdk.App();
 // Note: Stacks will be executed in A-Z order of stack id
-new DynamodbStack(app, 'A-DynamodbStack', {
-  env: {
-    account: appConfig.profile.accountId,
-    region: appConfig.profile.region,
-  },
-});
+// new DynamodbStack(app, 'A-DynamodbStack', {
+//   env: {
+//     account: appConfig.profile.accountId,
+//     region: appConfig.profile.region,
+//   },
+// });
 
 new BaseStack(app, 'B-BaseStack', {
   env: {
